@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HtmlGame PlayOn</title>
+  <style>
+    canvas {
+      background: #eee;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="800" height="600"></canvas>
+
+<script>
+  // JavaScript code goes here
+
+  var canvas = document.getElementById("myCanvas");
+  var ctx = canvas.getContext("2d");
+
+  var ballRadius = 10;
+  var targetRadius = 30;
+  var ballColor = getRandomColor();
+
+  var paddleHeight = 75;
+  var paddleWidth = 10;
+  var paddleY = (canvas.height - paddleHeight)/2;
+
+  var x = paddleWidth;
+  var dx = 6;
+
+  var arrowLength = 120;
+  var spacePressed = false;
+  var enterPressed = false;
+
+
+
+  function draw() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawTarget();
+    drawPaddle();
+    drawArrow(paddleWidth + x, canvas.height/2, arrowLength + x , canvas.height/2);
+    if((enterPressed || spacePressed) && x < canvas.width - targetRadius){
+      shootArrow();
+    }
+
+
+    if(x + arrowLength >= canvas.width - targetRadius){
+      console.log("Ball crossed boundary");
+      enterPressed = false;
+      spacePressed = false;
+      x = 0;
+    }
+
+
+  }
+
+  function shootArrow() {
+    x = x + dx;
+    drawArrow(paddleWidth + x, canvas.height/2, arrowLength + x , canvas.height/2);
+  }
+
+  function drawBall(){
+    ctx.beginPath();
+    ctx.arc(paddleWidth + x, canvas.height/2, ballRadius, 0, Math.PI*2);
+    ctx.fillStyle = ballColor;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function drawTarget(){
+    ctx.beginPath();
+    ctx.arc(canvas.width, canvas.height/2, targetRadius, 90, Math.PI, true);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(0, paddleY, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+
+  document.addEventListener("keydown", keyDownHandler, false);
+
+  function keyDownHandler(e){
+    console.log("key pressed");
+    if(e.keyCode === 32){
+      enterPressed = true;
+    }
+    else if(e.keyCode === 13){
+      spacePressed = true;
+    }
+  }
+
+  function keyUpHandler(e) {
+    if(e.keyCode === 32) {
+      enterPressed = false;
+    }
+    else if(e.keyCode === 13) {
+      spacePressed = false;
+    }
+  }
+
+  function drawArrow(fromx, fromy, tox, toy){
+    //variables to be used when creating the arrow
+    var headlen = 10;
+
+    var angle = Math.atan2(toy-fromy,tox-fromx);
+
+    //starting path of the arrow from the start square to the end square and drawing the stroke
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.strokeStyle = "#cc0000";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    //starting a new path from the head of the arrow to one of the sides of the point
+    ctx.beginPath();
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    //path from the side point of the arrow, to the other side point
+    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+
+    //path from the side point back to the tip of the arrow, and then again to the opposite side point
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    //draws the paths created above
+    ctx.strokeStyle = "#cc0000";
+    ctx.lineWidth = 10;
+    ctx.stroke();
+    ctx.fillStyle = "#cc0000";
+    ctx.fill();
+  }
+  setInterval(draw, 10);
+
+</script>
+</body>
+</html>
