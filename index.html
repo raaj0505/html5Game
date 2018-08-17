@@ -13,6 +13,7 @@
 </head>
 <body>
 
+<h1 style="text-align: center"> Score: <span id="score">0</span></h1>
 <canvas id="myCanvas" width="800" height="600"></canvas>
 
 <script>
@@ -23,6 +24,10 @@
 
   var ballRadius = 10;
   var targetRadius = 30;
+  var targetX = canvas.width;
+  var targetY = canvas.height/2;
+  var targetSpeed = 2;
+
   var ballColor = getRandomColor();
 
   var paddleHeight = 75;
@@ -30,37 +35,35 @@
   var paddleY = (canvas.height - paddleHeight)/2;
 
   var x = paddleWidth;
-  var dx = 6;
+  var arrowSpeed = 12;
 
   var arrowLength = 120;
   var spacePressed = false;
   var enterPressed = false;
 
+  var score = 0;
+  var perHitScore = 10;
 
 
-  function draw() {
+
+  function drawGame() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTarget();
-    drawPaddle();
+    drawArrowBasePaddle();
     drawArrow(paddleWidth + x, canvas.height/2, arrowLength + x , canvas.height/2);
+
     if((enterPressed || spacePressed) && x < canvas.width - targetRadius){
       shootArrow();
     }
-
-
-    if(x + arrowLength >= canvas.width - targetRadius){
-      console.log("Ball crossed boundary");
-      enterPressed = false;
-      spacePressed = false;
-      x = 0;
-    }
-
+    calculateScoreOnHit();
+    resetArrowOnHit();
+    moveTarget();
 
   }
 
   function shootArrow() {
-    x = x + dx;
+    x = x + arrowSpeed;
     drawArrow(paddleWidth + x, canvas.height/2, arrowLength + x , canvas.height/2);
   }
 
@@ -74,13 +77,13 @@
 
   function drawTarget(){
     ctx.beginPath();
-    ctx.arc(canvas.width, canvas.height/2, targetRadius, 90, Math.PI, true);
+    ctx.arc(targetX, targetY, targetRadius, 90, Math.PI, true);
     ctx.fillStyle = "red";
     ctx.fill();
     ctx.closePath();
   }
 
-  function drawPaddle() {
+  function drawArrowBasePaddle() {
     ctx.beginPath();
     ctx.rect(0, paddleY, paddleWidth, paddleHeight);
     ctx.fillStyle = "#0095DD";
@@ -109,14 +112,34 @@
     }
   }
 
-  function keyUpHandler(e) {
-    if(e.keyCode === 32) {
-      enterPressed = false;
-    }
-    else if(e.keyCode === 13) {
-      spacePressed = false;
+  function calculateScoreOnHit() {
+    if ((targetY > canvas.height / 2 - targetRadius && targetY < canvas.height / 2 + targetRadius) && (x + arrowLength >= canvas.width - targetRadius)) {
+      console.log("Arrow hit the target");
+      score += perHitScore;
+      updateScore();
     }
   }
+
+  function updateScore() {
+    var div = document.getElementById("score");
+    div.innerHTML = score;
+  }
+  function moveTarget() {
+    if(targetY  >= canvas.height - targetRadius || targetY - targetRadius <= 0){
+      targetSpeed = - targetSpeed;
+    }
+
+    targetY += targetSpeed;
+  }
+
+  function resetArrowOnHit() {
+    if(x + arrowLength >= canvas.width - targetRadius){
+      enterPressed = false;
+      spacePressed = false;
+      x = 0;
+    }
+  }
+
 
   function drawArrow(fromx, fromy, tox, toy){
     //variables to be used when creating the arrow
@@ -151,7 +174,7 @@
     ctx.fillStyle = "#cc0000";
     ctx.fill();
   }
-  setInterval(draw, 10);
+  setInterval(drawGame, 10);
 
 </script>
 </body>
